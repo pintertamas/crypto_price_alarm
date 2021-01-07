@@ -1,8 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 from beepy import beep
-from re import sub
-from decimal import Decimal
 import math
 import threading
 
@@ -20,7 +18,7 @@ class PriceAlarm:
         try:
             print("Choose an alarm sound!\nOptions:")
             for index in self.alarm_list:
-                print("\t{}: {}".format(index, self.alarm_list[index]))
+                print(f"\t{index}: {self.alarm_list[index]}")
             sound = input()
             if 1 <= int(sound) <= 7:
                 self.alarm = int(sound)
@@ -53,21 +51,20 @@ class PriceAlarm:
             beep(sound=self.alarm)
 
     def format_prices(self, price):
-        price = Decimal(sub(r'[^\d.]', '', price))
-        price = math.trunc(price)
-        return price
+        price = price.replace('$', '')
+        price = price.replace(',','')
+        return float(price)
 
     def handle_user_input(self):
         target = input("Set the target price please!\n")
         try:
             if target == "!p" or target == "!price":
-                print("Current price of {} is: {}".format(self.currency.capitalize(), self.get_price()))
+                print(f"Current price of {self.currency.capitalize()} is: {self.get_price()}")
 
             elif target == "!a" or target == "!alarm":
                 self.should_beep = not self.should_beep
                 if self.should_beep:
-                    print("alarm sound is on! ({})".format(
-                        self.alarm_list[self.alarm]))
+                    print(f"alarm sound is on! ({self.alarm_list[self.alarm]})")
                 else:
                     print("alarm sound is off!")
 
@@ -91,13 +88,15 @@ class PriceAlarm:
                 self.should_check = False
                 print("Exiting...")
 
-            elif (type(target) == str and type(self.format_prices(target)) == int) or type(target) == int and self.should_check == True:
+            elif (type(target) == str and type(self.format_prices(target)) == float) or type(target) == float and self.should_check == True:
                 self.target = self.format_prices(target)
+            else:
+                print(type(target))
         except:
             print("Give me a normal target you dumb ass!")
 
     def check_price(self):
-        if self.get_price() >= self.target:
+        if float(self.get_price()) >= float(self.target):
             self.play_sound()
 
     def check_loop(self):
