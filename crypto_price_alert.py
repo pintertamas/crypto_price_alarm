@@ -11,12 +11,13 @@ import threading
 import platform
 
 
-class PriceAlert:
+class PriceAlarm:
     target = 10000000
     alarm = 1
     should_check = True
     should_beep = True
-    alarm_list = {1 : 'coin', 2 : 'robot_error', 3 : 'error', 4 : 'ping', 5 : 'ready', 6 : 'success', 7 : 'wilhelm'}
+    alarm_list = {1: 'coin', 2: 'robot_error', 3: 'error',
+                  4: 'ping', 5: 'ready', 6: 'success', 7: 'wilhelm'}
 
     def choose_alarm(self):
         try:
@@ -51,22 +52,33 @@ class PriceAlert:
         price = math.trunc(price)
         return price
 
-    def set_target(self):
+    def handle_user_input(self):
         target = input("Set the target price please!\n")
         try:
             if target == "!p" or target == "!price":
                 print("Current price is: {}".format(self.get_price()))
-            elif target == "!b" or target == "!beep":
+
+            elif target == "!a" or target == "!alarm":
                 self.should_beep = not self.should_beep
                 if self.should_beep:
-                    print("Alert sound is on! ({})".format(self.alarm))
+                    print("alarm sound is on! ({})".format(
+                        self.alarm_list[self.alarm]))
                 else:
-                    print("Alert sound is off!")
-            elif target == "!a" or target == "!alarm":
+                    print("alarm sound is off!")
+
+            elif target == "!s" or target == "!sound":
                 self.choose_alarm()
+
+            elif target == "!h" or target == "!help":
+                print("To check the current price, type !p or !price")
+                print("To turn on/off the alarm, type !a or !alarm")
+                print("To change the alarm sound, type !s or !sound")
+                print("To close the program, type !e or !exit")
+
             elif target == "!e" or target == "!exit":
                 self.should_check = False
                 print("Exiting...")
+
             elif (type(target) == str and type(self.format_prices(target)) == int) or type(target) == int and self.should_check == True:
                 self.target = self.format_prices(target)
         except:
@@ -81,10 +93,9 @@ class PriceAlert:
             self.check_price()
 
 
-pa = PriceAlert()
-pa.choose_alarm()
+pa = PriceAlarm()
 func = threading.Thread(target=pa.check_loop)
 func.start()
 
 while pa.should_check:
-    pa.set_target()
+    pa.handle_user_input()
