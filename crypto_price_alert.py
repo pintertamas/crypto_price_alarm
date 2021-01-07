@@ -70,10 +70,10 @@ class PriceAlarm:
                 self.choose_alarm()
 
             elif target == "!h" or target == "!help":
-                print("To check the current price, type !p or !price")
-                print("To turn on/off the alarm, type !a or !alarm")
-                print("To change the alarm sound, type !s or !sound")
-                print("To close the program, type !e or !exit")
+                print("\tTo check the current price, type !p or !price")
+                print("\tTo turn on/off the alarm, type !a or !alarm")
+                print("\tTo change the alarm sound, type !s or !sound")
+                print("\tTo close the program, type !e or !exit\n")
 
             elif target == "!e" or target == "!exit":
                 self.should_check = False
