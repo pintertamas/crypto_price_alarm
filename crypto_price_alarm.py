@@ -10,6 +10,7 @@ import threading
 class PriceAlarm:
     target = 10000000
     alarm = 1
+    currency = "bitcoin"
     should_check = True
     should_beep = True
     alarm_list = {1: 'coin', 2: 'robot_error', 3: 'error',
@@ -29,15 +30,23 @@ class PriceAlarm:
             print("Give me a number from 1 to 7 you dumb ass!")
 
     def get_price(self):
-        URL = "https://coinmarketcap.com/currencies/ethereum/"
-        page = requests.get(URL)
-        soup = BeautifulSoup(page.content, 'html.parser')
+        try:
+            URL = "https://coinmarketcap.com/currencies/" + self.currency.lower() + "/"
+            page = requests.get(URL)
+            soup = BeautifulSoup(page.content, 'html.parser')
 
-        result = soup.find(id='__next')
-        price = result.find(class_="priceValue___11gHJ")
-        price = price.text.strip()
-        price = self.format_prices(price)
-        return price
+            result = soup.find(id='__next')
+            price = result.find(class_="priceValue___11gHJ")
+            price = price.text.strip()
+            price = self.format_prices(price)
+            return price
+        except:
+            self.currency = "bitcoin"
+            print("This is not a valid currency!")
+            return -1
+        
+    def print_currency(self):
+        print("The currency you are watching is: " + str(self.currency))
 
     def play_sound(self):
         if self.should_beep:
@@ -52,7 +61,7 @@ class PriceAlarm:
         target = input("Set the target price please!\n")
         try:
             if target == "!p" or target == "!price":
-                print("Current price is: {}".format(self.get_price()))
+                print("Current price of {} is: {}".format(self.currency.capitalize(), self.get_price()))
 
             elif target == "!a" or target == "!alarm":
                 self.should_beep = not self.should_beep
@@ -65,8 +74,15 @@ class PriceAlarm:
             elif target == "!s" or target == "!sound":
                 self.choose_alarm()
 
+            elif "!c" in target or "!currency" in target:
+                target = target.replace('!currency ', '')
+                target = target.replace('!c ', '')
+                self.currency = target
+
+
             elif target == "!h" or target == "!help":
                 print("\tTo check the current price, type !p or !price")
+                print("\tTo change the currency, type !c or !currency, then type the currency's name")
                 print("\tTo turn on/off the alarm, type !a or !alarm")
                 print("\tTo change the alarm sound, type !s or !sound")
                 print("\tTo close the program, type !e or !exit\n")
