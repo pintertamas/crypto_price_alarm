@@ -16,12 +16,16 @@ class PriceAlert:
     alarm = 1
     should_check = True
     should_beep = True
+    alarm_list = {1 : 'coin', 2 : 'robot_error', 3 : 'error', 4 : 'ping', 5 : 'ready', 6 : 'success', 7 : 'wilhelm'}
 
     def choose_alarm(self):
         try:
-            sound = input("Choose an alarm sound!\n\tOptions:\n\t1 : 'coin'\n\t2 : 'robot_error'\n\t3 : 'error'\n\t4 : 'ping'\n\t5 : 'ready'\n\t6 : 'success'\n\t7 : 'wilhelm'\n\n")
+            print("Choose an alarm sound!\nOptions:")
+            for index in self.alarm_list:
+                print("\t{}: {}".format(index, self.alarm_list[index]))
+            sound = input()
             if 1 <= int(sound) <= 7:
-                self.alarm = sound
+                self.alarm = int(sound)
             else:
                 raise Exception()
         except:
@@ -55,7 +59,7 @@ class PriceAlert:
             elif target == "!b" or target == "!beep":
                 self.should_beep = not self.should_beep
                 if self.should_beep:
-                    print("Alert sound is on!")
+                    print("Alert sound is on! ({})".format(self.alarm))
                 else:
                     print("Alert sound is off!")
             elif target == "!a" or target == "!alarm":
