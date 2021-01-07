@@ -1,5 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
+from beepy import beep
+import simpleaudio
 import os
 import sys
 from re import sub
@@ -7,14 +9,23 @@ from decimal import Decimal
 import math
 import threading
 import platform
-from beepy import beep
-import simpleaudio
 
 
 class PriceAlert:
     target = 10000000
+    alarm = 1
     should_check = True
     should_beep = True
+
+    def choose_alarm(self):
+        try:
+            sound = input("Choose an alarm sound!\n\tOptions:\n\t1 : 'coin'\n\t2 : 'robot_error'\n\t3 : 'error'\n\t4 : 'ping'\n\t5 : 'ready'\n\t6 : 'success'\n\t7 : 'wilhelm'\n\n")
+            if 1 <= int(sound) <= 7:
+                self.alarm = sound
+            else:
+                raise Exception()
+        except:
+            print("Give me a number from 1 to 7 you dumb ass!")
 
     def get_price(self):
         URL = "https://coinmarketcap.com/currencies/ethereum/"
@@ -29,7 +40,7 @@ class PriceAlert:
 
     def play_sound(self):
         if self.should_beep:
-            beep(sound=1)
+            beep(sound=self.alarm)
 
     def format_prices(self, price):
         price = Decimal(sub(r'[^\d.]', '', price))
@@ -47,6 +58,8 @@ class PriceAlert:
                     print("Alert sound is on!")
                 else:
                     print("Alert sound is off!")
+            elif target == "!a" or target == "!alarm":
+                self.choose_alarm()
             elif target == "!e" or target == "!exit":
                 self.should_check = False
                 print("Exiting...")
@@ -65,6 +78,7 @@ class PriceAlert:
 
 
 pa = PriceAlert()
+pa.choose_alarm()
 func = threading.Thread(target=pa.check_loop)
 func.start()
 
