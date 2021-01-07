@@ -1,14 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 from beepy import beep
-import simpleaudio
-import os
-import sys
 from re import sub
 from decimal import Decimal
 import math
 import threading
-import platform
 
 
 class PriceAlarm:
