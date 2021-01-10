@@ -1,12 +1,26 @@
 import requests
 from bs4 import BeautifulSoup
 from beepy import beep
-import math
 import threading
 
 
+def print_help():
+    print("\tTo set a target price, just type it!")
+    print("\tTo check the current price, type !p or !price")
+    print("\tTo change the currency, type !c or !currency, then type the currency's name")
+    print("\tTo turn on/off the alarm, type !a or !alarm")
+    print("\tTo change the alarm sound, type !s or !sound")
+    print("\tTo close the program, type !e or !exit")
+
+
+def format_prices(price):
+    price = price.replace('$', '')
+    price = price.replace(',', '')
+    return round(float(price), 2)
+
+
 class PriceAlarm:
-    target = 10000000
+    target = -1
     alarm = 1
     currency = "bitcoin"
     should_check = True
@@ -36,13 +50,13 @@ class PriceAlarm:
             result = soup.find(id='__next')
             price = result.find(class_="priceValue___11gHJ")
             price = price.text.strip()
-            price = self.format_prices(price)
+            price = format_prices(price)
             return price
         except:
             self.currency = "bitcoin"
             print("This is not a valid currency!")
             return -1
-        
+
     def print_currency(self):
         print("The currency you are watching is: " + str(self.currency))
 
@@ -50,50 +64,51 @@ class PriceAlarm:
         if self.should_beep:
             beep(sound=self.alarm)
 
-    def format_prices(self, price):
-        price = price.replace('$', '')
-        price = price.replace(',','')
-        return float(price)
+    def print_price(self):
+        print(
+            f"Current price of {self.currency.capitalize()} is: {self.get_price()}. The target price is: {self.target}")
+
+    def print_alarm(self):
+        self.should_beep = not self.should_beep
+        if self.should_beep:
+            print(f"alarm sound is on! ({self.alarm_list[self.alarm]})")
+        else:
+            print("alarm sound is off!")
+
+    def choose_currency(self, target):
+        target = target.replace('!currency ', '')
+        target = target.replace('!c ', '')
+        self.currency = target
 
     def handle_user_input(self):
-        target = input("Set the target price please!\n")
+        target = input()
         try:
             if target == "!p" or target == "!price":
-                print(f"Current price of {self.currency.capitalize()} is: {self.get_price()}")
+                self.print_price()
 
             elif target == "!a" or target == "!alarm":
-                self.should_beep = not self.should_beep
-                if self.should_beep:
-                    print(f"alarm sound is on! ({self.alarm_list[self.alarm]})")
-                else:
-                    print("alarm sound is off!")
+                self.print_alarm()
 
             elif target == "!s" or target == "!sound":
                 self.choose_alarm()
 
             elif "!c" in target or "!currency" in target:
-                target = target.replace('!currency ', '')
-                target = target.replace('!c ', '')
-                self.currency = target
-
+                self.choose_currency(target)
 
             elif target == "!h" or target == "!help":
-                print("\tTo check the current price, type !p or !price")
-                print("\tTo change the currency, type !c or !currency, then type the currency's name")
-                print("\tTo turn on/off the alarm, type !a or !alarm")
-                print("\tTo change the alarm sound, type !s or !sound")
-                print("\tTo close the program, type !e or !exit\n")
+                print_help()
 
             elif target == "!e" or target == "!exit":
                 self.should_check = False
                 print("Exiting...")
 
-            elif (type(target) == str and type(self.format_prices(target)) == float) or type(target) == float and self.should_check == True:
-                self.target = self.format_prices(target)
+            elif (type(target) is str and type(format_prices(target)) is float) or type(
+                    target) is float and self.should_check is True:
+                self.target = format_prices(target)
             else:
-                print(type(target))
+                print("There was an error. Try again!")
         except:
-            print("Give me a normal target you dumb ass!")
+            print("Give me a valid input please!")
 
     def check_price(self):
         if float(self.get_price()) >= float(self.target):
@@ -105,6 +120,8 @@ class PriceAlarm:
 
 
 pa = PriceAlarm()
+pa.target = round(pa.get_price() * 1.1, 2)
+print_help()
 func = threading.Thread(target=pa.check_loop)
 func.start()
 
